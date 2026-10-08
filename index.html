@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#1d4ed8">
+  <title>墨笺 · 本地笔记</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="appShell" class="app-shell">
+    <header class="topbar">
+      <button id="mobileNavBtn" class="icon-btn mobile-only" title="打开目录">☰</button>
+      <div class="brand"><span class="brand-mark">墨</span><span>墨笺</span><small>本地优先</small></div>
+      <label class="search-box" for="searchInput"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="搜索标题、正文、标签…" autocomplete="off"><kbd>Ctrl K</kbd></label>
+      <div class="top-actions">
+        <button id="newNoteBtn" class="primary-btn" title="新建笔记 (Ctrl+N)">＋ <span>新建</span></button>
+        <button id="aiBtn" class="icon-btn" title="AI 助理">✦</button>
+        <button id="settingsBtn" class="icon-btn" title="设置与数据">⚙</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside id="sidebar" class="sidebar" aria-label="导航">
+        <div class="sidebar-head"><span>工作区</span><button id="collapseSidebarBtn" class="icon-btn small" title="收起目录">‹</button></div>
+        <nav class="smart-nav" aria-label="智能视图">
+          <button class="nav-item" data-view="today"><span>◷</span><span>今天</span><em id="todayCount">0</em></button>
+          <button class="nav-item active" data-view="all"><span>▤</span><span>全部笔记</span><em id="allCount">0</em></button>
+          <button class="nav-item" data-view="starred"><span>★</span><span>收藏</span><em id="starredCount">0</em></button>
+          <button class="nav-item" data-view="trash"><span>♲</span><span>回收站</span><em id="trashCount">0</em></button>
+        </nav>
+        <div class="section-title"><span>目录</span><div><button id="newRootFolderBtn" class="icon-btn small" title="新建目录">＋</button><button id="expandAllBtn" class="icon-btn small" title="展开全部">⌄</button></div></div>
+        <div id="folderTree" class="folder-tree" role="tree"></div>
+        <div class="sidebar-footer"><span id="saveState" class="save-state">正在加载…</span><button id="exportQuickBtn" class="text-btn">导出备份</button></div>
+      </aside>
+
+      <section class="note-list-panel" aria-label="笔记列表">
+        <div class="list-head"><div><h1 id="listTitle">全部笔记</h1><p id="listSubtitle">按最近修改排序</p></div><div class="list-actions"><button id="sortBtn" class="icon-btn small" title="切换排序">↕</button><button id="refreshBtn" class="icon-btn small" title="刷新">↻</button></div></div>
+        <div id="filterChips" class="filter-chips" hidden></div>
+        <div id="noteList" class="note-list" role="list"></div>
+        <div id="listEmpty" class="empty-state" hidden><div class="empty-icon">✎</div><h2>还没有笔记</h2><p>按 <kbd>Ctrl N</kbd> 或点击右上角“新建”开始记录。</p><button id="emptyNewBtn" class="primary-btn">新建第一篇</button></div>
+      </section>
+
+      <section id="editor-panel" class="editor-panel" aria-label="编辑器">
+        <div id="editorEmpty" class="editor-empty"><div class="empty-icon">▱</div><h2>选择一篇笔记</h2><p>把想法放进目录，稍后再整理。</p><button id="editorNewBtn" class="secondary-btn">新建笔记</button></div>
+        <div id="editor" class="editor" hidden>
+          <div class="editor-head"><input id="noteTitle" class="note-title" placeholder="无标题" maxlength="200"><div class="editor-head-actions"><button id="pinBtn" class="icon-btn" title="置顶">⌖</button><button id="starBtn" class="icon-btn" title="收藏">☆</button><button id="deleteBtn" class="icon-btn danger" title="移入回收站">♲</button><button id="moreNoteBtn" class="icon-btn" title="更多操作">…</button></div></div>
+          <div class="note-meta"><select id="noteFolder" aria-label="所属目录"></select><input id="noteTags" aria-label="标签" placeholder="标签，用逗号分隔"><span id="noteUpdated" class="muted"></span></div>
+          <div class="format-toolbar" role="toolbar"><button data-insert="# " title="标题">H</button><button data-insert="- " title="列表">•</button><button data-insert="- [ ] " title="待办">☑</button><button data-insert="> " title="引用">❯</button><button id="previewBtn" title="预览">◫</button><span class="toolbar-spacer"></span><button id="editorAiBtn" title="用 AI 处理当前笔记">✦ AI</button></div>
+          <textarea id="noteContent" class="note-content" placeholder="从这里开始记录…支持 Markdown 语法"></textarea>
+          <div id="notePreview" class="note-preview" hidden></div>
+          <div class="editor-foot"><span id="wordCount">0 字</span><span>自动保存 · <kbd>Ctrl S</kbd></span></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toastRegion" class="toast-region" aria-live="polite"></div>
+  <dialog id="settingsDialog" class="modal"><div class="modal-head"><div><h2>设置与数据</h2><p>把低频操作集中到这里，编辑区保持清爽。</p></div><button class="icon-btn" data-close="settingsDialog">×</button></div><div class="settings-layout"><nav class="settings-tabs"><button class="active" data-tab="appearance">外观</button><button data-tab="data">数据</button><button data-tab="ai">AI 连接</button><button data-tab="about">关于</button></nav><div class="settings-content">
+    <section data-panel="appearance"><h3>外观与行为</h3><label class="setting-row"><span>主题</span><select id="themeSelect"><option value="system">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option></select></label><label class="setting-row"><span>界面密度</span><select id="densitySelect"><option value="comfortable">舒适</option><option value="compact">紧凑</option></select></label><label class="setting-row"><span>编辑字号</span><input id="fontSizeRange" type="range" min="14" max="22" step="1"><output id="fontSizeValue">16px</output></label><div class="setting-note">偏好只保存在本机浏览器中，不会上传。</div></section>
+    <section data-panel="data" hidden><h3>数据管理</h3><div class="data-actions"><button id="exportBtn" class="secondary-btn">导出全部备份</button><button id="importBtn" class="secondary-btn">导入备份</button><input id="importFile" type="file" accept="application/json" hidden></div><div class="setting-note">导出的 JSON 不包含 AI 密钥。导入会生成新的 ID，不覆盖现有笔记。</div><hr><button id="legacyScanBtn" class="secondary-btn">扫描旧版数据</button><div id="legacyResult" class="setting-note"></div><hr><button id="clearTrashBtn" class="danger-btn">清空回收站</button></section>
+    <section data-panel="ai" hidden><h3>AI 连接</h3><p class="setting-note">密钥由本机代理使用 Windows DPAPI 加密保存，网页端只看到“已配置”。发送前始终需要你的确认。</p><div id="profileList" class="profile-list"></div><button id="addProfileBtn" class="secondary-btn">＋ 添加连接</button><div id="profileForm" class="profile-form" hidden><input id="profileId" type="hidden"><label>名称<input id="profileName" maxlength="40" placeholder="例如：DeepSeek 工作"></label><label>接口地址<input id="profileBaseUrl" placeholder="https://api.deepseek.com/v1"></label><label>模型<input id="profileModel" placeholder="deepseek-chat"></label><label>API Key <input id="profileKey" type="password" autocomplete="off" placeholder="留空则保留已保存密钥"></label><div class="form-actions"><button id="cancelProfileBtn" class="text-btn">取消</button><button id="saveProfileBtn" class="primary-btn">保存连接</button></div></div></section>
+    <section data-panel="about" hidden><h3>墨笺 2.1.0</h3><p>本地优先的日常笔记工具。笔记存储在浏览器 IndexedDB，AI 请求通过本机服务转发。</p><ul class="about-list"><li>服务地址：127.0.0.1:17836</li><li>离线可用，不依赖外部 CDN</li><li>数据可导出为 JSON，便于迁移</li></ul><p class="setting-note">如需升级，请先导出备份，再替换程序文件。浏览器数据库不会因替换程序而清空。</p></section>
+  </div></div></dialog>
+
+  <dialog id="aiDialog" class="modal ai-modal"><div class="modal-head"><div><h2>AI 助理</h2><p>只处理当前笔记，结果先预览，不自动覆盖。</p></div><button class="icon-btn" data-close="aiDialog">×</button></div><div class="ai-form"><label>连接<select id="aiProfileSelect"></select></label><label>动作<select id="aiAction"><option value="summary">总结要点</option><option value="todo">提取行动项</option><option value="outline">整理提纲</option><option value="polish">润色文字</option><option value="custom">自定义指令</option></select></label><label id="customPromptRow" hidden>自定义要求<textarea id="customPrompt" rows="3" placeholder="例如：用三句话概括，并保留专有名词"></textarea></label><div class="privacy-confirm"><input id="aiConfirm" type="checkbox"><label for="aiConfirm">我确认将当前笔记发送到所选 AI 服务商处理</label></div><div class="ai-actions"><button id="aiCancelBtn" class="text-btn" hidden>取消请求</button><button id="aiRunBtn" class="primary-btn">生成结果</button></div><div id="aiStatus" class="ai-status"></div><label>结果预览<textarea id="aiResult" rows="10" readonly placeholder="结果会显示在这里"></textarea></label><div class="ai-result-actions"><button id="aiAppendBtn" class="secondary-btn" disabled>追加到当前笔记</button><button id="aiNewNoteBtn" class="secondary-btn" disabled>另存为新笔记</button></div></div></dialog>
+
+  <dialog id="confirmDialog" class="confirm-modal"><h3 id="confirmTitle">确认操作</h3><p id="confirmMessage"></p><div class="confirm-actions"><button id="confirmCancel" class="text-btn">取消</button><button id="confirmOk" class="danger-btn">确认</button></div></dialog>
+  <script src="app.js"></script>
+</body>
+</html>
